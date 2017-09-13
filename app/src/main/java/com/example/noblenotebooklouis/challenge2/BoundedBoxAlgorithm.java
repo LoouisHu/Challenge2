@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.example.noblenotebooklouis.challenge2.Utils.getActiveBeacons;
 
 /**
  * Created by Noble Notebook Louis on 13-Sep-17.
@@ -14,26 +13,27 @@ public class BoundedBoxAlgorithm {
 
 
     /**
-     * Get the final position of the running application
+     * Get the final position of the running application.
      * @return
      */
     public Position getNodePosition(List<Beacon> beacons) {
         List<Beacon> activeBeacons = Utils.getActiveBeacons(beacons);
         List<Beacon> nearbyBeacons = Utils.getNearbyBeacons(activeBeacons);
-        for (Beacon b : nearbyBeacons) {
 
-        }
+        CubeBeacon cb1 = new CubeBeacon(nearbyBeacons.get(0));
+        CubeBeacon cb2 = new CubeBeacon(nearbyBeacons.get(1));
+        CubeBeacon cb3 = new CubeBeacon(nearbyBeacons.get(2));
 
-        return null;
+        return drawCube(cb1, cb2, cb3).getPosition();
     }
 
 
     /**
-     * Checks whether two cubes have collision
-     * @return True if the cubes intersect, false otherwise
+     * Checks whether two cubes have collision.
+     * @return True if the cubes intersect, false otherwise.
      * @param c1 c2 Two given 2-D cubes
      */
-    private boolean isCollission(CubeBeacon c1, CubeBeacon c2) {
+    private boolean isCollision(CubeBeacon c1, CubeBeacon c2) {
         boolean result = false;
 
         if (c1.getTopLeft().getX() + c1.getWidth() >= c2.getTopLeft().getX()
@@ -53,7 +53,7 @@ public class BoundedBoxAlgorithm {
      *  @return
      */
     private CubePosition drawCube(CubeBeacon c1, CubeBeacon c2, CubeBeacon c3) {
-        if (isCollission(c1, c2) && isCollission(c2, c3) && isCollission(c1, c3)) {
+        if (isCollision(c1, c2) && isCollision(c2, c3) && isCollision(c1, c3)) {
             int x1, x2, y1, y2;
             List<Integer> xs = new ArrayList<Integer>();
             xs.add(c1.getBeacon().getPos().getX());

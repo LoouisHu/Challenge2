@@ -1,17 +1,13 @@
 package com.example.noblenotebooklouis.challenge2;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,17 +16,29 @@ import java.util.List;
 
 /**
  * Created by Noble Notebook Louis on 13-Sep-17.
+ * Static utilities to calculate or extract data.
  */
 
-//TODO also need to implement txPower, calibration constants
 
 public class Utils {
 
+    /**
+     * Calculate estimate distance through RSSI.
+     * @param rssi RSSI
+     * @param txPower RSSI power at 1m from the iBeacon
+     * @return
+     */
     public static double calculateDistance(int rssi, double txPower) {
         return Math.pow(10d, (txPower - (double) rssi) / (10 * 2));
     }
 
-
+    /**
+     * Uses Apache POI to extract data from the designlab.xlsx Excel file.
+     *
+     * @return A list of beacons with address and pixel (x,y)-coordinates.
+     * @throws IOException
+     * @throws InvalidFormatException
+     */
     public static List<Beacon> getExcelBeacons() throws IOException, InvalidFormatException {
         List<Beacon> result = new ArrayList<Beacon>();
 

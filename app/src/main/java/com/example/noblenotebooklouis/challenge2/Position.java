@@ -5,18 +5,18 @@ package com.example.noblenotebooklouis.challenge2;
  */
 
 public class Position {
-    private double x, y;
+    private int x, y;
 
-    public Position(double x, double y) {
+    public Position(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public double getX() {
+    public int getX() {
         return x;
     }
 
-    public double getY() {
+    public int getY() {
         return y;
     }
 }

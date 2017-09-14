@@ -17,6 +17,6 @@
         android:layout_width="1051dp"
         android:layout_height="697dp"
         app:srcCompat="@drawable/designlab"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintHorizontal_bias="0.596"
+        app:layout_constraintVertical_bias="1.0" />
 </android.support.constraint.ConstraintLayout>

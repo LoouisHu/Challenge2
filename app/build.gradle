@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    //    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -32,4 +32,5 @@ dependencies {
     compile files('libs/poi-ooxml-3.16.jar')
     compile files('libs/poi-ooxml-schemas-3.16.jar')
     compile files('libs/xmlbeans-2.6.0.jar')
+    compile files('libs/commons-collections4-4.1.jar')
 }

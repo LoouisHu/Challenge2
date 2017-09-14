@@ -20,6 +20,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -43,7 +46,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        beacons = Utils.getExcelBeacons();
+        try {
+            beacons = Utils.getExcelBeacons();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        }
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         adapter = bluetoothManager.getAdapter();

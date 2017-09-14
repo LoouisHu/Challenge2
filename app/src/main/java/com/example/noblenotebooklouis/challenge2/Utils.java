@@ -41,8 +41,7 @@ public class Utils {
      */
     public static List<Beacon> getExcelBeacons() throws IOException, InvalidFormatException {
         List<Beacon> result = new ArrayList<Beacon>();
-
-        OPCPackage pkg = OPCPackage.open(new File("designlab.xlsx"));
+        OPCPackage pkg = OPCPackage.open(new File("C:/Users/Louis/AndroidStudioProjects/Challenge2/app/src/main/assets/designlab.xlsx"));
         XSSFWorkbook wb = new XSSFWorkbook(pkg);
         XSSFSheet sheet = wb.getSheetAt(0);
 

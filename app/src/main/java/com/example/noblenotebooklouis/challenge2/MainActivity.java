@@ -8,6 +8,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,8 +29,18 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter adapter;
     private BluetoothLeScanner scanner;
     private ScanCallback callback;
+    private AssetManager assetManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,13 +65,39 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         beacons = null;
+            // Creating Input Stream
+   /*
+    * File file = new File( filename); FileInputStream myInput = new
+    * FileInputStream(file);
+    */
+
+
+
+        //  Don't forget to Change to your assets folder excel sheet
         try {
-            beacons = Utils.getExcelBeacons();
+            InputStream myInput = assetManager.open("designlab.xlsx");
+
+            beacons = new ArrayList<Beacon>();
+
+            XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(myInput);
+            //XSSFWorkbook wb = new XSSFWorkbook(pkg);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+                Cell address = row.getCell(0);
+                Cell x = row.getCell(7);
+                Cell y = row.getCell(8);
+                if (row.getRowNum() == 0) {
+                    continue;
+                }
+                beacons.add(new Beacon(address.getStringCellValue(), new Position((int) x.getNumericCellValue(), (int) y.getNumericCellValue())));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InvalidFormatException e) {
             e.printStackTrace();
         }
+
 
         final BluetoothManager bluetoothManager = (BluetoothManager) getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         adapter = bluetoothManager.getAdapter();

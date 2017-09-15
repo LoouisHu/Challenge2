@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -156,9 +157,23 @@ public class MainActivity extends AppCompatActivity {
         if (activeBeacons.size() >= 4) {
             Position pos = BoundedBoxAlgorithm.getNodePosition(activeBeacons);
 
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            image.setImageResource(R.drawable.designlab);
+            final Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap().copy(Bitmap.Config.ARGB_8888, true);
+            canvas = new Canvas(bitmap);
+
+            for (Beacon b : database.getAnchors()) {
+                Paint paint = new Paint();
+                paint.setColor(Color.BLUE);
+                canvas.drawCircle(b.getPos().getX() * 4, b.getPos().getY() * 4, 10, paint); //multiply by 3 so it fits the png.
+            }
+
             Paint paint = new Paint();
             paint.setColor(Color.GREEN);
             canvas.drawCircle(pos.getX() * 4, pos.getY() * 4, 30, paint);
+
+            image.setImageBitmap(bitmap);
+            image.invalidate();
         }
     }
 

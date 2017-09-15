@@ -106,6 +106,7 @@ public class Utils {
             for (Beacon b : beacons) {
                 if (rssis.get(i) == b.getRssi()) {
                     result.add(b);
+                    break;
                 }
             }
         }

@@ -83,8 +83,14 @@ public class MainActivity extends AppCompatActivity {
         if (position != null) {
             Paint paint = new Paint();
             paint.setColor(Color.GREEN);
-            canvas.drawCircle(position.getX(), position.getY(), 10, paint);    // for circle dot
+            canvas.drawCircle(position.getX()*3, position.getY()*3, 10, paint);    // for circle dot
             //canvas.drawPoint(touchX, touchY, paint);  // for single point
+        }
+
+        for (Beacon b : database.getAnchors()) {
+            Paint paint = new Paint();
+            paint.setColor(Color.BLUE);
+            canvas.drawCircle(b.getPos().getX()*3, b.getPos().getY()*3, 10, paint); //multiply by 3 so it fits the png.
         }
         image.setImageBitmap(bitmap);
         image.invalidate();

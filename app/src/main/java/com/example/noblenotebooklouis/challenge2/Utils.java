@@ -2,15 +2,6 @@ package com.example.noblenotebooklouis.challenge2;
 
 import android.content.res.AssetManager;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,25 +33,25 @@ public class Utils {
      * @throws IOException
      * @throws InvalidFormatException
      */
-    public static List<Beacon> getExcelBeacons() throws IOException, InvalidFormatException {
-        List<Beacon> result = new ArrayList<Beacon>();
-//        OPCPackage pkg = OPCPackage.open(new File("C:/Users/Louis/AndroidStudioProjects/Challenge2/app/src/main/assets/designlab.xlsx"));
-        XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File("C:/Users/Louis/AndroidStudioProjects/Challenge2/app/src/main/assets/designlab.xlsx")));
-        XSSFSheet sheet = wb.getSheetAt(0);
-
-        for (Row row : sheet) {
-            Cell address = row.getCell(0);
-            Cell x = row.getCell(7);
-            Cell y = row.getCell(8);
-            if (row.getRowNum() == 0) {
-                continue;
-            }
-            result.add(new Beacon(address.getStringCellValue(), new Position((int) x.getNumericCellValue(), (int) y.getNumericCellValue())));
-        }
-
-        return result;
-
-    }
+//    public static List<Beacon> getExcelBeacons() throws IOException, InvalidFormatException {
+//        List<Beacon> result = new ArrayList<Beacon>();
+////        OPCPackage pkg = OPCPackage.open(new File("C:/Users/Louis/AndroidStudioProjects/Challenge2/app/src/main/assets/designlab.xlsx"));
+//        XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(new File("C:/Users/Louis/AndroidStudioProjects/Challenge2/app/src/main/assets/designlab.xlsx")));
+//        XSSFSheet sheet = wb.getSheetAt(0);
+//
+//        for (Row row : sheet) {
+//            Cell address = row.getCell(0);
+//            Cell x = row.getCell(7);
+//            Cell y = row.getCell(8);
+//            if (row.getRowNum() == 0) {
+//                continue;
+//            }
+//            result.add(new Beacon(address.getStringCellValue(), new Position((int) x.getNumericCellValue(), (int) y.getNumericCellValue())));
+//        }
+//
+//        return result;
+//
+//    }
 
 
     /**

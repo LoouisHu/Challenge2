@@ -23,7 +23,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -35,12 +37,15 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewGroup mainLayout;
     private ImageView image;
+    private Button button;
+    private boolean running;
 
     private List<Beacon> beacons;
     private Database database;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean scanning;
     private Handler handler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +54,12 @@ public class MainActivity extends AppCompatActivity {
 
         database = new Database();
         beacons = database.getAnchors();
+        running = false;
 
         final BluetoothManager bluetoothManager = (BluetoothManager)  getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        setImage();
 
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -64,36 +72,77 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        button = (Button)findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
 
-        mBluetoothAdapter.getBluetoothLeScanner().startScan(new ScanCallback() {
             @Override
-            public void onScanResult(int callbackType, ScanResult result) {
-                final int rssi = result.getRssi();
-                final String address = result.getDevice().getAddress();
-                for (Beacon b : beacons) {
-                    if (b.getAddress().equals(address)) {
-                        b.setRssi(rssi);
-                        Log.d("SCAN RESULT",  "rssi: "+ rssi + ", address: " + address);
-                    }
+            public void onClick(View v) {
+                if (!running) {
+                    running = true;
+                    button.setText("stop");
+
+                    mBluetoothAdapter.getBluetoothLeScanner().startScan(new ScanCallback() {
+                        @Override
+                        public void onScanResult(int callbackType, ScanResult result) {
+                            final int rssi = result.getRssi();
+                            final String address = result.getDevice().getAddress();
+                            for (Beacon b : beacons) {
+                                if (b.getAddress().equals(address)) {
+                                    b.setRssi(rssi);
+                                    Log.d("SCAN RESULT", "rssi: " + rssi + ", address: " + address);
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onBatchScanResults(List<ScanResult> results) {
+                            super.onBatchScanResults(results);
+                        }
+
+                        @Override
+                        public void onScanFailed(int errorCode) {
+                            super.onScanFailed(errorCode);
+                        }
+                    });
+                } else {
+                    running = false;
+                    button.setText("start");
+
+                    mBluetoothAdapter.getBluetoothLeScanner().stopScan(new ScanCallback() {
+                        @Override
+                        public void onScanResult(int callbackType, ScanResult result) {
+                            super.onScanResult(callbackType, result);
+                        }
+
+                        @Override
+                        public void onBatchScanResults(List<ScanResult> results) {
+                            super.onBatchScanResults(results);
+                        }
+
+                        @Override
+                        public void onScanFailed(int errorCode) {
+                            super.onScanFailed(errorCode);
+                        }
+                    });
                 }
-
             }
 
-            @Override
-            public void onBatchScanResults(List<ScanResult> results) {
-                super.onBatchScanResults(results);
-            }
-
-            @Override
-            public void onScanFailed(int errorCode) {
-                super.onScanFailed(errorCode);
-            }
         });
+    }
 
+    private void setImage() {
         image = (ImageView) findViewById(R.id.image);
         image.setImageResource(R.drawable.designlab);
         final Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap().copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
+        
+        if (running) {
+            Position pos = new Position(BoundedBoxAlgorithm.getNodePosition(beacons).getX(), BoundedBoxAlgorithm.getNodePosition(beacons).getY());
+            Paint paint = new Paint();
+            paint.setColor(Color.GREEN);
+            canvas.drawCircle(pos.getX() * 4, pos.getY() * 4, 10, paint);
+        }
 
         for (Beacon b : database.getAnchors()) {
             Paint paint = new Paint();

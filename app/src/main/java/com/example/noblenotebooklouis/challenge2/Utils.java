@@ -78,20 +78,39 @@ public class Utils {
 
     public static List<Beacon> getNearbyBeacons(List<Beacon> beacons) {
 
-        Collections.max(beacons, new Comparator<Beacon>() {
-            @Override
-            public int compare(Beacon beacon, Beacon t1) {
-                if (beacon.getRssi() > t1.getRssi()) {
-                    return -1;
-                }
-                if (beacon.getRssi() == t1.getRssi()) {
-                    return 0;
-                }
-                return 1;
-            }
-        });
+//        Collections.max(beacons, new Comparator<Beacon>() {
+//            @Override
+//            public int compare(Beacon beacon, Beacon t1) {
+//                if (beacon.getRssi() > t1.getRssi()) {
+//                    return -1;
+//                }
+//                if (beacon.getRssi() == t1.getRssi()) {
+//                    return 0;
+//                }
+//                return 1;
+//            }
+//        });
 
-        return beacons.subList(0, 3);
+        List<Integer> rssis = new ArrayList<>();
+
+        for (Beacon b : beacons) {
+            rssis.add(b.getRssi());
+        }
+
+        Collections.sort(rssis);
+        Collections.reverse(rssis);
+
+        List<Beacon> result = new ArrayList<Beacon>();
+
+        for(int i = 0; i < 3; i++) { // Get first four
+            for (Beacon b : beacons) {
+                if (rssis.get(i) == b.getRssi()) {
+                    result.add(b);
+                }
+            }
+        }
+
+        return result;
     }
 
 

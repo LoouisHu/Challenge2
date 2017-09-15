@@ -8,7 +8,7 @@ public class Beacon {
 
     private Position pos;
     private String address;
-    private Integer rssi;
+    private int rssi;
 
     public Beacon(String address, Position pos) {
         this.address = address;
@@ -23,7 +23,7 @@ public class Beacon {
         return address;
     }
 
-    public void setRssi(Integer rssi) {
+    public void setRssi(int rssi) {
         this.rssi = rssi;
     }
 

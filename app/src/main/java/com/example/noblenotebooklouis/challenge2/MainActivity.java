@@ -8,35 +8,39 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
+import android.location.LocationManager;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
 
     private ViewGroup mainLayout;
     private ImageView image;
 
-    private int xDelta;
-    private int yDelta;
-
     private List<Beacon> beacons;
     private Database database;
-
-    private BluetoothAdapter adapter;
-    private BluetoothLeScanner scanner;
-    private ScanCallback callback;
-    private AssetManager assetManager;
+    private BluetoothAdapter mBluetoothAdapter;
+    private boolean scanning;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,53 +50,79 @@ public class MainActivity extends AppCompatActivity {
         database = new Database();
         beacons = database.getAnchors();
 
-        final BluetoothManager bluetoothManager = (BluetoothManager) getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
-        adapter = bluetoothManager.getAdapter();
-        callback = new ScanCallback() {
+        final BluetoothManager bluetoothManager = (BluetoothManager)  getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, 99);
+        }
+        Log.d("SCAN", "starting scan...");
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            buildMessageBox();
+
+        }
+
+
+        mBluetoothAdapter.getBluetoothLeScanner().startScan(new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, ScanResult result) {
-                if (result != null && result.getDevice() != null && result.getScanRecord() != null) {
-                    FindBeacons.findBeacons(result.getDevice(), result.getRssi(), beacons);
-                }
-            }
-            @Override
-            public void onBatchScanResults(List< ScanResult > results) {
-                if (results != null) {
-                    for (ScanResult result: results) {
-                        if (result != null && result.getDevice() != null && result.getScanRecord() != null) {
-                            FindBeacons.findBeacons(result.getDevice(), result.getRssi(), beacons);
-                        }
+                final int rssi = result.getRssi();
+                final String address = result.getDevice().getAddress();
+                for (Beacon b : beacons) {
+                    if (b.getAddress().equals(address)) {
+                        b.setRssi(rssi);
+                        Log.d("SCAN RESULT",  "rssi: "+ rssi + ", address: " + address);
                     }
                 }
-            }
-            @Override
-            public void onScanFailed(int errorCode) {}
-        };
 
-        scanner = adapter.getBluetoothLeScanner();
-        scanner.startScan(Collections.<ScanFilter>emptyList(), new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), callback);
-        Position position = null;
-        if (!beacons.isEmpty()) {
-            position = BoundedBoxAlgorithm.getNodePosition(beacons);
-        }
+            }
+
+            @Override
+            public void onBatchScanResults(List<ScanResult> results) {
+                super.onBatchScanResults(results);
+            }
+
+            @Override
+            public void onScanFailed(int errorCode) {
+                super.onScanFailed(errorCode);
+            }
+        });
 
         image = (ImageView) findViewById(R.id.image);
         image.setImageResource(R.drawable.designlab);
         final Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap().copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
-        if (position != null) {
-            Paint paint = new Paint();
-            paint.setColor(Color.GREEN);
-            canvas.drawCircle(position.getX() * 3, position.getY() * 3, 10, paint);    // for circle dot
-            //canvas.drawPoint(touchX, touchY, paint);  // for single point
-        }
 
         for (Beacon b : database.getAnchors()) {
             Paint paint = new Paint();
             paint.setColor(Color.BLUE);
-            canvas.drawCircle(b.getPos().getX() * 3, b.getPos().getY() * 3, 10, paint); //multiply by 3 so it fits the png.
+            canvas.drawCircle(b.getPos().getX() * 4, b.getPos().getY() * 4, 10, paint); //multiply by 3 so it fits the png.
         }
         image.setImageBitmap(bitmap);
         image.invalidate();
+    }
+
+    private void buildMessageBox() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
     }
 }

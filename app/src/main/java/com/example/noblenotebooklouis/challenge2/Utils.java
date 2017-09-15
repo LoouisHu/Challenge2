@@ -102,16 +102,17 @@ public class Utils {
 
         List<Beacon> result = new ArrayList<Beacon>();
 
-        for(int i = 0; i < 3; i++) { // Get first four
+        for(int i = 0; i < rssis.size(); i++) { // Get first four
             for (Beacon b : beacons) {
                 if (rssis.get(i) == b.getRssi()) {
-                    result.add(b);
-                    break;
+                    if(!result.contains(b)) {
+                        result.add(b);
+                    }
                 }
             }
         }
 
-        return result;
+        return result.subList(0, 3);
     }
 
 

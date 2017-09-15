@@ -55,20 +55,17 @@ public class Utils {
 
 
     /**
-     *  Compare the beacons with the existing list of beacons in the Excel file.
-     *  Compare the unique address with the beacon in the file and return the list.
-     *  Deprecated.
-     * @param beacons       The list of beacons from scanning with the Bluetooth LE.
-     * @param excelBeacons  The existing list in the Excel file.
+     *  Method to get all the active beacons, which rssi has changed from 0 to
+     *  another int.
+     *
+     * @param beacons      The list of beacons, probably rssi changed.
      * @return
      */
-    public static List<Beacon> getActiveBeacons(List<Beacon> beacons, List<Beacon> excelBeacons) {
-        List<Beacon> result = new ArrayList<Beacon>();
+    public static List<Beacon> getActiveBeacons(List<Beacon> beacons) {
+            List<Beacon> result = new ArrayList<Beacon>();
         for (Beacon b : beacons) {
-            for (Beacon eB : excelBeacons) {
-                if (b.getAddress().equals(eB.getAddress())) {
-                    result.add(b);
-                }
+            if (b.getRssi() != 0) {
+                result.add(b);
             }
         }
         return result;

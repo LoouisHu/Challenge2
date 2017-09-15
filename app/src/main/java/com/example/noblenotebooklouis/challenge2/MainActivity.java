@@ -103,6 +103,12 @@ public class MainActivity extends AppCompatActivity {
                             final String address = result.getDevice().getAddress().replaceAll("[:]", "");
                             Position pos = database.compareAddress(address);
                             if(pos != null) {
+                                for (Beacon b : activeBeacons) {
+                                    if (b.getAddress().equals(address)){
+                                        b.setRssi(rssi);
+                                        continue;
+                                    }
+                                }
                                 Beacon activeBeacon = new Beacon(address, pos);
                                 activeBeacon.setRssi(rssi);
                                 activeBeacons.add(activeBeacon);

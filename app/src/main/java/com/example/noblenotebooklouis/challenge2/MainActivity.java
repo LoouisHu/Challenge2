@@ -1,5 +1,7 @@
 package com.example.noblenotebooklouis.challenge2;
 
+import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -10,6 +12,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -19,6 +22,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +34,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Handler;
@@ -41,10 +47,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean running;
 
     private List<Beacon> beacons;
+    private List<Beacon> activeBeacons;
     private Database database;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean scanning;
     private Handler handler;
+    private Canvas canvas;
 
 
     @Override
@@ -54,7 +62,10 @@ public class MainActivity extends AppCompatActivity {
 
         database = new Database();
         beacons = database.getAnchors();
+        activeBeacons = new ArrayList<Beacon>();
         running = false;
+
+        final int REQUEST_GET_LOCATION = 2;
 
         final BluetoothManager bluetoothManager = (BluetoothManager)  getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -65,7 +76,11 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, 99);
         }
-        Log.d("SCAN", "starting scan...");
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_GET_LOCATION);
+        }
+
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildMessageBox();
@@ -85,14 +100,14 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onScanResult(int callbackType, ScanResult result) {
                             final int rssi = result.getRssi();
-                            final String address = result.getDevice().getAddress();
-                            for (Beacon b : beacons) {
-                                if (b.getAddress().equals(address)) {
-                                    b.setRssi(rssi);
-                                    Log.d("SCAN RESULT", "rssi: " + rssi + ", address: " + address);
-                                }
+                            final String address = result.getDevice().getAddress().replaceAll("[:]", "");
+                            Position pos = database.compareAddress(address);
+                            if(pos != null) {
+                                Beacon activeBeacon = new Beacon(address, pos);
+                                activeBeacon.setRssi(rssi);
+                                activeBeacons.add(activeBeacon);
                             }
-
+                            updatePosition();
                         }
 
                         @Override
@@ -131,18 +146,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void updatePosition() {
+        if (activeBeacons.size() >= 4) {
+            Position pos = BoundedBoxAlgorithm.getNodePosition(activeBeacons);
+
+            Paint paint = new Paint();
+            paint.setColor(Color.GREEN);
+            canvas.drawCircle(pos.getX() * 4, pos.getY() * 4, 30, paint);
+        }
+    }
+
     private void setImage() {
         image = (ImageView) findViewById(R.id.image);
         image.setImageResource(R.drawable.designlab);
         final Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap().copy(Bitmap.Config.ARGB_8888, true);
-        Canvas canvas = new Canvas(bitmap);
-        
-        if (running) {
-            Position pos = new Position(BoundedBoxAlgorithm.getNodePosition(beacons).getX(), BoundedBoxAlgorithm.getNodePosition(beacons).getY());
-            Paint paint = new Paint();
-            paint.setColor(Color.GREEN);
-            canvas.drawCircle(pos.getX() * 4, pos.getY() * 4, 10, paint);
-        }
+        canvas = new Canvas(bitmap);
 
         for (Beacon b : database.getAnchors()) {
             Paint paint = new Paint();

@@ -29,8 +29,15 @@ public class BoundedBoxAlgorithm {
         for (Beacon b : nearbyBeacons) {
             cubes.add(new Cube(b));
         }
+        RectanglePosition rp = drawCube(cubes);
 
-        return drawCube(cubes).getPosition();
+        if (rp == null) {
+            return new Position(0, 0);
+        }
+
+        Position result = rp.getPosition();
+
+        return result;
     }
 
 
@@ -59,6 +66,9 @@ public class BoundedBoxAlgorithm {
      *  @return
      */
     public static RectanglePosition drawCube(List<Cube> cubes) {
+        if (cubes.size() < 4){
+            return null;
+        }
         Cube c1 = cubes.get(0);
         Cube c2 = cubes.get(1);
         Cube c3 = cubes.get(2);

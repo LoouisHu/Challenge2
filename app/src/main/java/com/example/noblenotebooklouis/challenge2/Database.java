@@ -68,7 +68,19 @@ public class Database {
     }
 
     public List<Beacon> getAnchors() {
+        for (Beacon b : anchors) {
+            b.getAddress().toUpperCase();
+        }
         return anchors;
+    }
+
+    public Position compareAddress(String address) {
+        for (Beacon b : anchors) {
+            if (b.getAddress().equals(address)) {
+                return b.getPos();
+            }
+        }
+        return null;
     }
 
 }

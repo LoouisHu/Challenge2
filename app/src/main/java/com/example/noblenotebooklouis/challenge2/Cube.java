@@ -16,7 +16,7 @@ public class Cube implements Rectangle {
 
     public Cube(Beacon b) {
         this.beacon = b;
-        radius = 50;
+        radius = 200;
     }
 
     public int getWidth() {
